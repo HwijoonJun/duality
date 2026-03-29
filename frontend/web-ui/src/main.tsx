@@ -1,12 +1,19 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import DashboardPage from './DashboardPage.tsx'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-    <DashboardPage />
-  </StrictMode>,
-)
+import './index.css';
+import {onLCP, onINP, onCLS} from 'web-vitals';
+
+import "./index.css";
+import router from "./router";
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
+);
+
+onCLS(console.log);
+onINP(console.log);
+onLCP(console.log);

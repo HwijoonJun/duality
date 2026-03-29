@@ -17,6 +17,11 @@ def get_tokens_for_user(user):
         "access": str(refresh.access_token),
     }
 
+class AllView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        return Response({"message": "Welcome to our application!"}, status=status.HTTP_200_OK)
+
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
