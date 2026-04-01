@@ -1,4 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import type { IFile } from "../../types/File";
+import FileUploadService from "../../services/FileUpload.service"
+
+
+
+const ImageUpload = () => {
+
+	const [currentImage, setCurrentImage] = useState<File>();
+	const [previewImage, setPreviewImage] = useState<string>("");
+	const [progress, setProgress] = useState<number>(0);
+	const [message, setMessage] = useState<string>("");
+
+	const [imageInfos, setImageInfos] = useState<Array<IFile>>([]);
+
+	const selectImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const selectedFiles = event.target.files as FileList;
+		setCurrentImage(selectedFiles?.[0]);
+		setPreviewImage(URL.createObjectURL(selectedFiles?.[0]));
+		setProgress(0);
+	};
+
+}
+
+
 
 export const UploadFile = () => {
     const [url] = useState('');

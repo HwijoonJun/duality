@@ -1,23 +1,23 @@
 import axios from 'axios';
 import authHeader from './auth-header';
 
-const API_URL = 'http://localhost:8000/';
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8000").replace(/\/+$/, "");
 
 class UserService {
   getPublicContent() {
-    return axios.get(API_URL + 'api/v1/all/')
+    return axios.get(`${API_BASE_URL}/api/v1/auth/all/`)
   }
 
   getUserBoard() {
-    return axios.get(API_URL + 'api/v1/me/', { headers: authHeader() });
+    return axios.get(`${API_BASE_URL}/api/v1/auth/me/`, { headers: authHeader() });
   }
 
   getModeratorBoard() {
-    return axios.get(API_URL + 'api/v1/mod/', { headers: authHeader() });
+    return axios.get(`${API_BASE_URL}/api/v1/mod/`, { headers: authHeader() });
   }
 
   getAdminBoard() {
-    return axios.get(API_URL + 'api/v1/admin/', { headers: authHeader() });
+    return axios.get(`${API_BASE_URL}/admin/`, { headers: authHeader() });
   }
     
 }

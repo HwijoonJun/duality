@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
 export const UploadDetails = () => {
-      const [className, setClassName] = useState('');
-      const [term, setTerm] = useState('');
-      const [professor, setProfessor] = useState('');
-      const [type, setType] = useState('');
-    
-      const contentTypes = ['Quiz', 'Midterm', 'Final', 'Practice Problems'];
+    const [className, setClass] = useState('');
+    const [term, setTerm] = useState('');
+    const [professor, setProfessor] = useState('');
+    const [type, setType] = useState('');
+
+    const contentTypes = ['Quiz', 'Midterm', 'Final', 'Practice Problems'];
 
 
     return (
@@ -20,7 +20,7 @@ export const UploadDetails = () => {
                     id="className"
                     type="text"
                     value={className}
-                    onChange={(e) => setClassName(e.target.value)}
+                    onChange={(e) => setClass(e.target.value)}
                     placeholder="e.g. CS 101"
                     className="w-full px-3 py-2 text-[14px] text-black placeholder:text-[#999] border border-[#e5e5e5] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />

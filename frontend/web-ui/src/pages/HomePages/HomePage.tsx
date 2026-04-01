@@ -7,7 +7,7 @@ import EventBus from "../../common/EventBus";
 
 import { AppFooter } from '../../components/Footer';
 import { AppHeader } from '../../components/Header';
-import { Upload } from '../../components/Upload';
+import Upload from '../../components/Upload';
 
 type Props = {};
 
