@@ -33,6 +33,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
+CORS_ORIGIN_ALLOW_ALL=True
 
 # Application definition
 
@@ -43,10 +45,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 
     "rest_framework",
     "rest_framework_simplejwt",
-    'accounts',
+
+    # apps
+    'apps.services',
+    'apps.accounts',
+    'apps.uploads',
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -73,6 +80,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -95,18 +103,43 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
+# Supabase Configuration
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+SUPABASE_MEDIA_BUCKET = os.getenv('SUPABASE_MEDIA_BUCKET', 'media')
+SUPABASE_STATIC_BUCKET = os.getenv('SUPABASE_STATIC_BUCKET', 'static')
+
+# Static files URL for Supabase
+STATIC_URL = f'{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_STATIC_BUCKET}/'
+
+# Media files URL for Supabase
+MEDIA_URL = f'{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_MEDIA_BUCKET}/'
+
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv("DB_ENGINE", 'django.db.backends.postgresql'),
+        'ENGINE': "django.db.backends.postgresql",
         'NAME': os.getenv("DB_NAME"),
-        'USER': os.getenv("DB_USER"),
-        'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': os.getenv("DB_HOST"),
+        'USER': os.getenv("SUPABASE_USER"),
+        'PASSWORD': os.getenv("SUPABASE_PASSWORD"),
+        'HOST': os.getenv("SUPABASE_HOST"),
         'PORT': os.getenv("DB_PORT", '5432'),
     }
 }
+
+# Storage Configuration
+STORAGES = {
+    'default': {
+        'BACKEND': os.getenv("SUPABASE_MEDIA_BUCKET", 'django_supabase_storage.SupabaseMediaStorage'),
+    },
+    'staticfiles': {
+        'BACKEND': os.getenv("SUPABASE_STATIC_BUCKET", 'django_supabase_storage.SupabaseStaticStorage'),
+    },
+}
+
+
 
 
 
