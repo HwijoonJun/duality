@@ -1,4 +1,4 @@
-export interface User {
+export interface UserInfo {
   id: number;
   username: string;
   email: string;
@@ -7,7 +7,7 @@ export interface User {
 export interface LoginResponse {
   access: string;
   refresh: string;
-  user: User;
+  user: UserInfo;
 }
 
 export interface RefreshResponse {
