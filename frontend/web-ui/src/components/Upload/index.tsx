@@ -8,9 +8,7 @@ interface UploadFormProps {
   url: string;
   setUrl: (url: string) => void;
   description: string;
-  setDescription: (desc: string) => void;
   selectedFiles: File[];
-  setSelectedFiles: (files: File[]) => void;
   className: string;
   setClassName: (name: string) => void;
   term: string;
@@ -48,9 +46,7 @@ function UploadFormPage({
   url,
   setUrl,
   description,
-  setDescription,
   selectedFiles,
-  setSelectedFiles,
   className,
   setClassName,
   term,
@@ -139,7 +135,8 @@ function UploadFormPage({
         <div className="bg-white rounded-xl border border-[#e5e5e5] p-6 shadow-sm">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded bg-transparent flex items-center justify-center flex-shrink-0 mt-0.5">
-                <img src="../../src/assets/crowdmark-logo-icon.png" alt="Link icon" className="w-10 h-10" />
+                  { /* image source from supabase image  */ }
+                <img src="https://peurtwpqjoapzezkhrfq.supabase.co/storage/v1/object/public/assests/crowdmark-logo-icon.png" alt="Link icon" className="w-10 h-10" />
             </div>
             <div className="flex-1">
               <input
@@ -506,9 +503,7 @@ export default function Upload() {
             url={url}
             setUrl={setUrl}
             description={description}
-            setDescription={setDescription}
             selectedFiles={selectedFiles}
-            setSelectedFiles={setSelectedFiles}
             className={className}
             setClassName={setClassName}
             term={term}

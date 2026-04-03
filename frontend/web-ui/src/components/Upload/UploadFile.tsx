@@ -1,33 +1,6 @@
-import React, { useState, useEffect } from 'react';
-
-import type { IFile } from "../../types/File";
-import FileUploadService from "../../services/FileUpload.service"
-
-
-
-const ImageUpload = () => {
-
-	const [currentImage, setCurrentImage] = useState<File>();
-	const [previewImage, setPreviewImage] = useState<string>("");
-	const [progress, setProgress] = useState<number>(0);
-	const [message, setMessage] = useState<string>("");
-
-	const [imageInfos, setImageInfos] = useState<Array<IFile>>([]);
-
-	const selectImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const selectedFiles = event.target.files as FileList;
-		setCurrentImage(selectedFiles?.[0]);
-		setPreviewImage(URL.createObjectURL(selectedFiles?.[0]));
-		setProgress(0);
-	};
-
-}
-
-
+import { useState } from 'react';
 
 export const UploadFile = () => {
-    const [url] = useState('');
-    const [description, setDescription] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
 
@@ -61,7 +34,7 @@ export const UploadFile = () => {
                 <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    disabled={!url && !selectedFile && !description}
+                    disabled={!selectedFile}
                     className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center hover:bg-[#333] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     →

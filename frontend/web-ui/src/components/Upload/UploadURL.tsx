@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export const UploadURL = () => {
     const [url, setUrl] = useState('');
