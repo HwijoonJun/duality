@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-import type { SectionKey, TestItem } from '../../../pages/Dashboard/types';
+import type { SectionKey, TestItem } from '../pages/Dashboard/types';
+
 
 export interface DashboardState {
 	activeSection: SectionKey;
