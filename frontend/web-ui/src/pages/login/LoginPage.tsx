@@ -71,7 +71,7 @@ export default function LoginPage3() {
             },
           });
 
-          setRedirect("/account");
+          setRedirect("/dashboard");
           return;
         }
 

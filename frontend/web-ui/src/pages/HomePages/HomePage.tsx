@@ -6,7 +6,7 @@ import type IUser from "../../types/user.type";
 import EventBus from "../../common/EventBus";
 
 import { AppFooter } from '../../components/Footer';
-import { AppHeader } from '../../components/Header';
+import { HomeHeader } from '../../components/Header/home.header';
 import Upload from '../../components/Upload';
 
 type Props = {};
@@ -66,7 +66,7 @@ export default class HomePage extends Component<Props, State> {
 
 		<div className="min-h-screen bg-[#fafafa] flex flex-col">
 
-			<AppHeader />
+			<HomeHeader />
 
 			<Upload />
 

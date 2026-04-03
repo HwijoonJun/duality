@@ -88,7 +88,7 @@ class CrowdmarkProcessor:
         with session.get(url, stream=True, timeout=30) as r:
             r.raise_for_status()
 
-            content_type = (r.headers.get("content-type") or "").lower()
+            content_type = (r.headers.get("content-type") or "").lower() 
             chunks = r.iter_content(chunk_size=65536)
             first_chunk = next(chunks, b"")
 
@@ -176,8 +176,6 @@ class CrowdmarkProcessor:
             signed_urls = []
             for url in urls:
                 tmp = CrowdmarkProcessor.upload_to_signed_url(url, session)
-                if tmp is None:
-                    continue
                 #print(tmp)
                 uploads.append(tmp[0])
 
@@ -190,8 +188,6 @@ class CrowdmarkProcessor:
             uploads = []
             for url in urls:
                 tmp = CrowdmarkProcessor.upload_to_bucket(url, session)
-                if tmp is None:
-                    continue
                 uploads.append(tmp.path)
 
             return uploads 

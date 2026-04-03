@@ -1,19 +1,19 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { User } from "../types/auth";
+import type { UserInfo } from "../types/auth";
 
 // helper function to update or clear the auth state
 interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
-  user: User | null;
+  user: UserInfo | null;
   setAuth: (payload: {
     access: string;
     refresh: string;
-    user: User;
+    user: UserInfo;
   }) => void;
   setAccessToken: (accessToken: string) => void;
-  setUser: (user: User) => void;
+  setUser: (user: UserInfo) => void;
   clearAuth: () => void;
 }
 

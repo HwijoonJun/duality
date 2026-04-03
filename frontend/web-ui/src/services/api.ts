@@ -1,8 +1,8 @@
 import { useAuthStore } from "../store/authStore";
 import type { ApiErrorShape, RefreshResponse } from "../types/auth";
+import { API_BASE_URL } from "./config";
 
-// change later
-const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
+const API_URL = `${API_BASE_URL}/api/v1`;
 
 type ApiFetchOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -39,7 +39,7 @@ async function refreshAccessToken(): Promise<string> {
     throw new ApiError("No refresh token available.");
   }
 
-  const response = await fetch(`${API_BASE_URL}/auth/refresh/`, {
+  const response = await fetch(`${API_URL}/auth/refresh/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export async function apiFetch<T>(
     ...(options.headers || {}),
   };
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,
     body: shouldSendBody
@@ -91,7 +91,6 @@ export async function apiFetch<T>(
         : JSON.stringify(options.body)
       : undefined,
   });
-
   const data = await parseJsonSafely<T & ApiErrorShape>(response);
 
   if (response.status === 401 && retry && !path.includes("/auth/refresh/")) {

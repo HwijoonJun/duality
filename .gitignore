@@ -5,6 +5,9 @@ content_processing.ipynb
 content_processing.py
 downloaded_pdfs
 
+# aws keypair
+*.pem
+
 
 ### Django ###
 *.log
@@ -139,6 +142,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
 .venv
 env/
 venv/

@@ -1,6 +1,3 @@
-import React from "react";
-
-
 export const AppFooter = () => {
   return (
     <footer className="w-full border-t border-[#e5e5e5] bg-white">

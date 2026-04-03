@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Globe, Image, FileText, X } from 'lucide-react';
+import { Globe, FileText, X } from 'lucide-react';
 
 // Types
 interface UploadFormProps {
@@ -8,7 +8,6 @@ interface UploadFormProps {
   description: string;
   setDescription: (desc: string) => void;
   selectedFiles: File[];
-  setSelectedFiles: (files: File[]) => void;
   className: string;
   setClassName: (name: string) => void;
   term: string;
@@ -48,7 +47,6 @@ function UploadFormPage({
   description,
   setDescription,
   selectedFiles,
-  setSelectedFiles,
   className,
   setClassName,
   term,
@@ -460,7 +458,6 @@ export default function UploadContent() {
             description={description}
             setDescription={setDescription}
             selectedFiles={selectedFiles}
-            setSelectedFiles={setSelectedFiles}
             className={className}
             setClassName={setClassName}
             term={term}

@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/login/LoginPage";
@@ -8,45 +7,50 @@ import SignupPage from "./pages/login/SignupPage";
 import Profile from "./components/User/profile.component";
 import BoardUser from "./components/Home/board-user.component";
 import BoardAdmin from "./components/Home/board-moderator.component";
+import UserDashboard from "./pages/Dashboard/UserDashboard"
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <HomePage />,
-  },
-  {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "/signup",
-    element: <SignupPage />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />, 
-  },
-  {
-    path: "/user",
-    element: <BoardUser />,
-  },
-  {
-    path: "/admin",
-    element: <BoardAdmin />,
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: "/account",
-        element: <UserManagementPage />,
-      },
-    ],
-  },
-  {
-    path: "/*",
-    element: <Navigate to="/account" replace />,
-  },
+	{
+		path: "/",
+		element: <HomePage />,
+	},
+	{
+		path: "/login",
+		element: <LoginPage />,
+	},
+	{
+		path: "/signup",
+		element: <SignupPage />,
+	},
+	{
+		path: "/profile",
+		element: <Profile />, 
+	},
+	{
+		path: "/user",
+		element: <BoardUser />,
+	},
+	{
+		path: "/admin",
+		element: <BoardAdmin />,
+	},
+	{
+		element: <ProtectedRoute />,
+		children: [
+		{
+			path: "/account",
+			element: <UserManagementPage />,
+		},
+		{
+			path: "/dashboard",
+			element: <UserDashboard />,
+		},
+		],
+	},
+	{
+		path: "/*",
+		element: <Navigate to="/account" replace />,
+	},
 
 ]);
 
