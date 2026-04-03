@@ -69,25 +69,29 @@ export default function UserDashboard() {
 			{/** Header */}
 			<DashboardHeader />
 
-			<div className="flex flex-1">
-				<div className="w-56 flex-shrink-0 border-r border-[#e5e5e5] bg-white px-3 py-5">
-					<div className="mb-5 px-3">
-					<p className="text-[11px] text-[#bbb] uppercase tracking-wider">Dashboard</p>
-					</div>
-					<Sidebar active={activeSection} onNavigate={handleNavigate} />
-				</div>
+			{!loading && !error && (
 
-				<main className="flex-1 px-8 py-8 overflow-y-auto min-h-0">
-					<SectionRenderer
-					activeSection={activeSection}
-					viewingTest={viewingTest}
-					onViewTest={handleViewTest}
-					onBackFromTest={handleBackFromTest}
-					onSetSection={setActiveSection}
-					onNavigate={handleNavigate}
-					/>
-				</main>
-			</div>
+				<div className="flex flex-1">
+					<div className="w-56 flex-shrink-0 border-r border-[#e5e5e5] bg-white px-3 py-5">
+						<div className="mb-5 px-3">
+						<p className="text-[11px] text-[#bbb] uppercase tracking-wider">Dashboard</p>
+						</div>
+						<Sidebar active={activeSection} onNavigate={handleNavigate} />
+					</div>
+
+					<main className="flex-1 px-8 py-8 overflow-y-auto min-h-0">
+						<SectionRenderer
+						activeSection={activeSection}
+						viewingTest={viewingTest}
+						onViewTest={handleViewTest}
+						onBackFromTest={handleBackFromTest}
+						onSetSection={setActiveSection}
+						onNavigate={handleNavigate}
+						/>
+					</main>
+				</div>
+			)}
+			
 		</div>
 	);
 }

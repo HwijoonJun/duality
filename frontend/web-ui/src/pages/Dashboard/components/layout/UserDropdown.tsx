@@ -5,6 +5,8 @@ import { mockUser } from '../../data/mockData';
 import type { SectionKey } from '../../types';
 
 import { useAuthStore } from "../../../../store/authStore";
+import { apiFetch, ApiError } from '../../../../services/api';
+import type { UserInfo } from '../../../../types/auth';
 
 interface UserDropdownProps {
 	onNavigate: (section: SectionKey) => void;
@@ -16,6 +18,50 @@ export function UserDropdown({ onNavigate, onLogout }: UserDropdownProps) {
 	const ref = useRef<HTMLDivElement>(null);
 
 	const user = useAuthStore((state) => state.user);
+
+	const setUser = useAuthStore((state) => state.setUser);
+	//const clearAuth = useAuthStore((state) => state.clearAuth);
+	
+	const [loading, setLoading] = useState<boolean>(true);
+	const [error, setError] = useState<string>("");
+
+
+	useEffect(() => {
+		let ignore = false;
+	
+		async function loadCurrentUser(): Promise<void> {
+		setLoading(true);
+		setError("");
+	
+		try {
+			const data = await apiFetch<UserInfo>("/auth/me/", {
+			method: "GET",
+			});
+	
+			if (!ignore) {
+			setUser(data);
+			}
+		} catch (error) {
+			if (!ignore) {
+			if (error instanceof ApiError) {
+				setError(error.message);
+			} else {
+				setError("Failed to load user.");
+			}
+			}
+		} finally {
+			if (!ignore) {
+			setLoading(false);
+			}
+		}
+		}
+	
+		loadCurrentUser();
+	
+		return () => {
+		ignore = true;
+		};
+	}, [setUser]);
 
 	useEffect(() => {
 		const handler = (e: MouseEvent) => {
@@ -30,20 +76,22 @@ export function UserDropdown({ onNavigate, onLogout }: UserDropdownProps) {
 
 	return (
 		<div ref={ref} className="relative">
-			<button
-				onClick={() => setOpen(prev => !prev)}
-				className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-[#f5f5f5] transition-colors"
-			>
-				<div className="w-8 rounded-full bg-black text-white flex items-center justify-center text-[11px]">
-					<img src="https://peurtwpqjoapzezkhrfq.supabase.co/storage/v1/object/public/assests/default_user_image.jpeg" alt={mockUser.avatar}
-						className="rounded-full border-0"
-						/>
-				</div>
-				<span className="text-[14px]">{user.username}</span>
-				<ChevronDown className={`w-3.5 h-3.5 text-[#999] transition-transform ${open ? 'rotate-180' : ''}`} />
-			</button>
+			{!loading && !error && user &&(
+				<button
+					onClick={() => setOpen(prev => !prev)}
+					className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-[#f5f5f5] transition-colors"
+				>	
+					<div className="w-8 rounded-full bg-black text-white flex items-center justify-center text-[11px]">
+						<img src="https://peurtwpqjoapzezkhrfq.supabase.co/storage/v1/object/public/assests/default_user_image.jpeg" alt={mockUser.avatar}
+							className="rounded-full border-0"
+							/>
+					</div>
+					<span className="text-[14px]">{user.username}</span>
+					<ChevronDown className={`w-3.5 h-3.5 text-[#999] transition-transform ${open ? 'rotate-180' : ''}`} />
+				</button>	
+			)}
 
-			{open && (
+			{open && !loading && !error && user &&(
 				<div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl border border-[#e5e5e5] shadow-lg overflow-hidden z-50">
 					<div className="px-4 py-3 border-b border-[#f0f0f0]">
 						<p className="text-[13px] text-black">{}</p>
