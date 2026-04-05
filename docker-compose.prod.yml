@@ -16,7 +16,7 @@ services:
       context: ./frontend/web-ui
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_API_URL: ${VITE_API_URL:-/}
     container_name: duality-frontend
     expose:
       - "80"
