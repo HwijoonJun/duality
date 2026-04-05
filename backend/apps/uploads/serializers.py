@@ -63,10 +63,8 @@ class ProcessCMUrlSerializer(serializers.Serializer):
     def process_cm_signed_url(cm_url: str):
         # Process Crowdmark URL and return JSON-serializable output.
         try:
-            print("1")
+            print("Initizated upload")
             result = asyncio.run(CrowdmarkProcessor(cm_url, tempfile.gettempdir()).main(sign=True))
-            print("2")
-            print(result)
             if isinstance(result, list):
                 return {"uploads": result[0],
                         "public_urls": result[1],

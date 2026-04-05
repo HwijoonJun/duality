@@ -1,0 +1,36 @@
+services:
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: duality-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./infra/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend/web-ui
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: duality-frontend
+    expose:
+      - "80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: duality-backend
+    env_file:
+      - ./backend/.env.prod
+    expose:
+      - "8000"
+    restart: unless-stopped
