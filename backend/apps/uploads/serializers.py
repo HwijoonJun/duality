@@ -63,17 +63,14 @@ class ProcessCMUrlSerializer(serializers.Serializer):
     def process_cm_signed_url(cm_url: str):
         # Process Crowdmark URL and return JSON-serializable output.
         try:
-            print("1")
             result = asyncio.run(CrowdmarkProcessor(cm_url, tempfile.gettempdir()).main(sign=True))
-            print("2")
-            print(result)
             if isinstance(result, list):
                 return {"uploads": result[0],
                         "public_urls": result[1],
                         }
             return str(result)
         except Exception as e:
-            raise APIException(f"Crowdmark processing error: {str(e)}")
+            raise serializers.ValidationError({"CM_url": f"Crowdmark processing failed: {str(e)}"})
 
     @staticmethod
     def process_cm_url(cm_url: str):
@@ -88,7 +85,7 @@ class ProcessCMUrlSerializer(serializers.Serializer):
                 
             return str(result)
         except Exception as e:
-            raise APIException(f"Crowdmark processing error: {str(e)}")
+            raise serializers.ValidationError({"CM_url": f"Crowdmark processing failed: {str(e)}"})
 
 
 

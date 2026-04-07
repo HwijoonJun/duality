@@ -1,13 +1,10 @@
-import asyncio
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
-import time
 import os
 import requests
 import tempfile
-import json
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 from .iou_eval import IouEvaluate
 
@@ -23,7 +20,21 @@ class CrowdmarkProcessor:
         self.CM_url = CM_url
         self.file_save_path = file_save_path
 
+    @staticmethod
+    def _extract_field(payload, field: str):
+        if isinstance(payload, dict):
+            direct = payload.get(field)
+            if direct:
+                return direct
+            nested = payload.get("data")
+            if isinstance(nested, dict):
+                return nested.get(field)
+            return None
+        return getattr(payload, field, None)
+
     def upload_to_bucket(url: str, session: requests.Session, idx: int = 1):
+        if not url:
+            return None
         
         with session.get(url, stream=True, timeout=30) as r:
             r.raise_for_status()
@@ -52,15 +63,23 @@ class CrowdmarkProcessor:
                 temp_path = tmp.name
 
                 import cv2
+                image = cv2.imread(temp_path)
+                if image is None:
+                    os.remove(temp_path)
+                    return None
 
                 model_path = Path(__file__).with_name("best.pt")
-                processed_image = IouEvaluate.add_bounding_box(
-                    temp_path, model_path, show_window=False
-                )[0]
+                try:
+                    processed_image = IouEvaluate.add_bounding_box(
+                        temp_path, model_path, show_window=False
+                    )[0]
+                except Exception:
+                    os.remove(temp_path)
+                    return None
                 cv2.imwrite(temp_path, processed_image)
 
                 #print(temp_path)
-                upload = supabase.storage.from_('content').upload(
+                upload = supabase.storage.from_(SUPABASE_MEDIA_BUCKET).upload(
                                                       file=temp_path,
                                                       path=name,
                                                       file_options={
@@ -69,14 +88,17 @@ class CrowdmarkProcessor:
                                                         )
 
                 os.remove(temp_path)
-        return upload
+        uploaded_path = CrowdmarkProcessor._extract_field(upload, "path")
+        if not uploaded_path:
+            raise ValueError("Upload to Supabase did not return a storage path.")
+        return uploaded_path
         
     
     def create_signed_upload_url(upload_file_path):
         # Generate signed upload URLs for file upload (valid for 2 hours)
         response = (
             supabase.storage
-            .from_('content')
+            .from_(SUPABASE_MEDIA_BUCKET)
             .create_signed_upload_url(
                 path=upload_file_path, 
                 options=CreateSignedUploadUrlOptions(upsert="true"),
@@ -85,6 +107,8 @@ class CrowdmarkProcessor:
         return response
     
     def upload_to_signed_url(url: str, session: requests.Session, idx: int = 1):
+        if not url:
+            return None
         with session.get(url, stream=True, timeout=30) as r:
             r.raise_for_status()
 
@@ -111,22 +135,34 @@ class CrowdmarkProcessor:
                 
                 # remove handwriting
                 import cv2
+                image = cv2.imread(temp_path)
+                if image is None:
+                    os.remove(temp_path)
+                    return None
 
                 model_path = Path(__file__).with_name("best.pt")
-                processed_image = IouEvaluate.add_bounding_box(
-                    temp_path, model_path, show_window=False
-                )[0]
+                try:
+                    processed_image = IouEvaluate.add_bounding_box(
+                        temp_path, model_path, show_window=False
+                    )[0]
+                except Exception:
+                    os.remove(temp_path)
+                    return None
                 cv2.imwrite(temp_path, processed_image)
 
                 signed_upload_url = CrowdmarkProcessor.create_signed_upload_url(name)
+                signed_path = CrowdmarkProcessor._extract_field(signed_upload_url, "path")
+                signed_token = CrowdmarkProcessor._extract_field(signed_upload_url, "token")
+                if not signed_path or not signed_token:
+                    raise ValueError("Could not read signed upload URL response from Supabase.")
                 
                 with open(temp_path, "rb") as f:
                     response = (
                         supabase.storage
-                        .from_("content")
+                        .from_(SUPABASE_MEDIA_BUCKET)
                         .upload_to_signed_url(
                             path=name,
-                            token=signed_upload_url["token"],
+                            token=signed_token,
                             file=f,
                             file_options={"content-type": "image/jpeg"},
                         )
@@ -135,12 +171,14 @@ class CrowdmarkProcessor:
 
                 os.remove(temp_path)
 
-            print([response.path, signed_upload_url])
-            return [response.path, signed_upload_url]
+            uploaded_path = CrowdmarkProcessor._extract_field(response, "path") or signed_path
+            if not uploaded_path:
+                raise ValueError("Signed upload completed without a storage path.")
+            return [uploaded_path, {"path": signed_path, "token": signed_token}]
 
 
         
-    async def main(self, sign=bool):
+    async def main(self, sign: bool = True):
         PHRASE = "m-aspect-img-wrapper"  # class-name substring to match
         URL = self.CM_url
 
@@ -165,29 +203,44 @@ class CrowdmarkProcessor:
             classes = div.get("class", [])
             if any(PHRASE in cls for cls in classes):
                 img = div.find("img") if div else None
-                url = img.get("src") if img else None
-                urls.append(url)
-                #print(url)
+                src = img.get("src") if img else None
+                if isinstance(src, str) and src.strip():
+                    urls.append(urljoin(URL, src))
 
-        session = requests.Session()
+        if not urls:
+            raise ValueError("No assessment images were found at the provided Crowdmark URL.")
 
-        if sign:
+        with requests.Session() as session:
+            if sign:
+                uploads = []
+                signed_urls = []
+                for idx, url in enumerate(urls, start=1):
+                    tmp = CrowdmarkProcessor.upload_to_signed_url(url, session, idx=idx)
+                    if not tmp:
+                        continue
+                    uploads.append(tmp[0])
+
+                    signed_url = (
+                        f"{SUPABASE_URL}/storage/v1/object/sign/"
+                        f"{SUPABASE_MEDIA_BUCKET}/{tmp[1]['path']}?token={tmp[1]['token']}"
+                    )
+                    signed_urls.append(signed_url)
+                if not uploads:
+                    raise ValueError(
+                        "No valid decodable assessment images were found. "
+                        "Use a direct Crowdmark share page with visible image content."
+                    )
+                return [uploads, signed_urls]
+
             uploads = []
-            signed_urls = []
-            for url in urls:
-                tmp = CrowdmarkProcessor.upload_to_signed_url(url, session)
-                #print(tmp)
-                uploads.append(tmp[0])
+            for idx, url in enumerate(urls, start=1):
+                uploaded_path = CrowdmarkProcessor.upload_to_bucket(url, session, idx=idx)
+                if uploaded_path:
+                    uploads.append(uploaded_path)
+            if not uploads:
+                raise ValueError(
+                    "No valid decodable assessment images were found. "
+                    "Use a direct Crowdmark share page with visible image content."
+                )
 
-                signed_url = SUPABASE_URL + "/storage/v1/object/sign/content/" + tmp[1]["path"] + "?token=" + tmp[1]["token"]
-                #print(signed_url)
-                signed_urls.append(signed_url)
-            return [uploads, signed_urls]
-
-        else:
-            uploads = []
-            for url in urls:
-                tmp = CrowdmarkProcessor.upload_to_bucket(url, session)
-                uploads.append(tmp.path)
-
-            return uploads 
+            return uploads
