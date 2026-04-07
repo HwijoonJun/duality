@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FileText, X } from 'lucide-react';
+import axios from 'axios';
 
 import FileUploadService from "../../services/FileUpload.service"
 
@@ -7,6 +8,7 @@ import FileUploadService from "../../services/FileUpload.service"
 interface UploadFormProps {
   url: string;
   setUrl: (url: string) => void;
+  submitError: string;
   description: string;
   selectedFiles: File[];
   className: string;
@@ -45,6 +47,7 @@ interface SuccessPageProps {
 function UploadFormPage({
   url,
   setUrl,
+  submitError,
   description,
   selectedFiles,
   className,
@@ -147,6 +150,7 @@ function UploadFormPage({
                 className="w-full text-[14px] text-black placeholder:text-[#999] focus:outline-none mb-1"
               />
               <p className="text-[12px] text-[#999]">Enter a URL to upload</p>
+              {submitError && <p className="text-[12px] text-red-600 mt-1">{submitError}</p>}
             </div>
           </div>
         </div>
@@ -433,6 +437,36 @@ export default function Upload() {
   const [type, setType] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  const getUploadErrorMessage = (data: unknown): string | null => {
+    if (!data || typeof data !== "object") {
+      return null;
+    }
+
+    const payload = data as Record<string, unknown>;
+    const messageCandidates = [
+      payload.CM_url,
+      payload.detail,
+      payload.message,
+      payload.non_field_errors,
+    ];
+
+    for (const candidate of messageCandidates) {
+      if (typeof candidate === "string" && candidate.trim()) {
+        return candidate;
+      }
+
+      if (Array.isArray(candidate)) {
+        const firstText = candidate.find((item): item is string => typeof item === "string" && item.trim().length > 0);
+        if (firstText) {
+          return firstText;
+        }
+      }
+    }
+
+    return null;
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -447,6 +481,7 @@ export default function Upload() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
 
     try {
       const { message, response } = await FileUploadService.sendCMUrl(url);
@@ -454,6 +489,12 @@ export default function Upload() {
       console.log("Public URLs:", response.public_urls);
       console.log("Uploaded files:", response.uploads);
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const serverMessage = getUploadErrorMessage(error.response?.data);
+        setSubmitError(serverMessage ?? "Unable to process this Crowdmark URL. Please verify the link is directly shareable.");
+      } else {
+        setSubmitError("Unable to process this Crowdmark URL. Please try again.");
+      }
       console.error("Failed to process Crowdmark URL", error);
       return;
     }
@@ -501,7 +542,13 @@ export default function Upload() {
         {!showPreview && !uploadComplete ? (
           <UploadFormPage
             url={url}
-            setUrl={setUrl}
+            setUrl={(nextUrl) => {
+              setUrl(nextUrl);
+              if (submitError) {
+                setSubmitError('');
+              }
+            }}
+            submitError={submitError}
             description={description}
             selectedFiles={selectedFiles}
             className={className}

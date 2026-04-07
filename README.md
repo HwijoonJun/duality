@@ -49,6 +49,11 @@ This creates clean training, validation, and test partitions before model fine-t
 
 ## 2. Fine-Tuned ML Model for Image Processing and Handwriting Removal
 
+| Original (`test.jpg`) | Processed (`results_test.jpg`) |
+| --- | --- |
+| <img src="backend/apps/services/test.jpg" alt="Original assessment image sample" width="100%" /> | <img src="backend/apps/services/results_test.jpg" alt="Processed assessment image sample with handwriting removed" width="100%" /> |
+
+
 The image-processing model is a fine-tuned Ultralytics YOLO detector trained to locate handwriting on uploaded assessment images. The trained artifacts live in `backend/apps/services/`:
 
 - `best.pt`: PyTorch model used by the Django runtime.
